@@ -1,0 +1,83 @@
+---
+# Update repositories
+- name: Update repositories cache
+  apt: 
+    update_cache: yes
+
+# Set timezone to UTC
+- name: Set servers timezone
+  timezone:
+    name: UTC
+
+# Install necessary packages, start and enable them
+- name: Install aptitude
+  apt: 
+    name: aptitude
+    state: present 
+    force_apt_get: yes
+
+# Install UFW
+- name: Install UFW
+  apt: 
+    name: ufw
+    state: present
+
+# Install zip
+- name: Install zip
+  apt: 
+    name: zip
+    state: present
+
+# Install nginx
+- name: Install nginx
+  apt: 
+    name: nginx
+    state: present
+# Remove default nginx site
+- name: Remove default nginx site from enabled sites
+  file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
+  notify: 
+    - reload nginx
+
+# Add PHP repo
+- name: Install software-properties-common
+  apt: 
+   name: software-properties-common
+   state: present
+- name: Add PHP repository
+  apt_repository:
+    repo: ppa:ondrej/php
+# Update repositories
+- name: Update repositories cache
+  apt: 
+    update_cache: yes
+
+# Install PHP
+- name: Install PHP {{php_version}}
+  apt: 
+    name: "php{{php_version}}"
+    state: present
+- name: Install PHP FPM
+  apt: 
+    name: "php{{php_version}}-fpm"
+    state: present
+
+# Start and enable nginx and php-fpm services
+- name: Start php-fpm service
+  service:
+    name: php{{php_version}}-fpm
+    state: started
+- name: Enable php-fpm service
+  systemd:
+    name: php{{php_version}}-fpm
+    enabled: yes
+- name: Start nginx service
+  service:
+    name: nginx
+    state: started
+- name: Enable nginx service
+  systemd:
+    name: nginx
+    enabled: yes

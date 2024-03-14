@@ -1,0 +1,106 @@
+---
+# The project files are in the home directory
+- name: Change user home directory permissions
+  file:
+    path: "/home/{{username}}"
+    owner: "{{username}}"
+    group: "{{username}}"
+    mode: "0755"
+
+# Create backup directory
+- name: Create backup directory
+  file:
+    path: "/home/{{username}}/backup" #create dir where deployments will be stored
+    state: directory
+    owner: "{{username}}"
+    group: "{{username}}"
+    mode: "0766"
+
+# Create test_files directory
+- name: Create test_files directory
+  file:
+    path: "/home/{{username}}/test_files" 
+    state: directory
+    owner: "{{username}}"
+    group: "{{username}}"
+    mode: "0755"
+- name: Create api subdirectory
+  file:
+    path: "/home/{{username}}/test_files/api" 
+    state: directory
+    owner: "{{username}}"
+    group: "{{username}}"
+    mode: "0755"
+- name: Create static subdirectory
+  file:
+    path: "/home/{{username}}/test_files/static" 
+    state: directory
+    owner: "{{username}}"
+    group: "{{username}}"
+    mode: "0755"
+
+- name: Copy static files to the server
+  copy:
+    src: "files/{{item}}"
+    dest: "/home/{{username}}/test_files/static"
+    owner: "{{username}}"
+    group: "{{username}}"
+    mode: "0644"
+  loop: 
+   - pikachu.png
+   - squirtle.png
+   - charmander.png
+   - bulbasaur.png
+
+- name: Copy index.html file to the server
+  copy:
+    src: "files/index.html"
+    dest: "/home/{{username}}/test_files"
+    owner: "{{username}}"
+    group: "{{username}}"
+    mode: "0644"
+
+- name: Copy 404 file to the server
+  copy:
+    src: "files/404.html"
+    dest: "/home/{{username}}/test_files"
+    owner: "{{username}}"
+    group: "{{username}}"
+    mode: "0644"
+
+- name: Copy hidden_file to the server
+  copy:
+    src: "files/hidden_file.txt"
+    dest: "/var/log/.hidden_file.txt"
+    mode: "0600"
+
+- name: Copy info.php file to the server
+  copy:
+    src: "files/info.php"
+    dest: "/home/{{username}}/test_files/api"
+    mode: "0644"
+
+# Create php-fpm pool
+- name: Create php-fpm pool for the site
+  template:
+    src: "templates/php.fpm.pool.conf.j2"
+    dest: "/etc/php/{{php_version}}/fpm/pool.d/{{subdomain}}.conf" #.conf required at the end
+- name: Force restart php-fpm
+  service: 
+    name: "php{{php_version}}-fpm"
+    state: restarted
+
+# Create nginx config
+- name: Sets nginx conf file for new subdomain
+  template:
+    src: "templates/nginx.http.conf.j2"
+    dest: "/etc/nginx/sites-available/{{subdomain}}"
+- name: Enable new nginx site "{{subdomain}}"
+  file:
+    src: "/etc/nginx/sites-available/{{subdomain}}"
+    dest: "/etc/nginx/sites-enabled/{{subdomain}}"
+    state: link
+- name: Force reload nginx configuration
+  service: 
+    name: nginx
+    state: reloaded

@@ -1,0 +1,2 @@
+Copy this file to the /home/candidate/test_files/ directory, owner of this file should be the candidate user.
+Good job btw!

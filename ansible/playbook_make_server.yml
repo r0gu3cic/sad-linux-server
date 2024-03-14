@@ -1,0 +1,18 @@
+# Ansible script that will configure server
+---
+- hosts: "{{ hosts }}"
+  become: true
+  roles:
+  - role: initial_server_setup
+  - role: users_setup
+  - role: files_and_config_setup
+# Stop and disable apache2 it interfere with nginx
+  tasks:
+    - name: Stop Apache service
+      service:
+        name: apache2
+        state: stopped
+    - name: Disable Apache service on boot
+      systemd:
+        name: apache2
+        enabled: no

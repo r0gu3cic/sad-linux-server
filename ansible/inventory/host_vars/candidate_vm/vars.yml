@@ -1,0 +1,11 @@
+---
+username: candidate
+password: "{{vault_password}}"
+
+root_password: "{{vault_root_password}}"
+
+php_version: 8.2
+
+candidate_name: namesurname
+
+subdomain: "{{candidate_name}}.fws.us"

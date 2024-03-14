@@ -1,0 +1,26 @@
+server {
+    listen 80;
+    server_name subdomain;
+    root /home/{{username}}/test_files;
+
+    ### hide nginx version
+    server_tokens off;
+
+    ### error page
+
+    index index.html index.php;
+    charset utf-8;
+
+    ### site location blocks
+    location /static/ {
+        root /home/{{username}}/test_files/;
+        autoindex on;
+    }
+
+    location /api {
+        root /home/{{username}}/test_files/;
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php{{php_version}}-fpm-{{subdomain}}DevOoops.sock;
+        include fastcgi_params;
+    }
+}

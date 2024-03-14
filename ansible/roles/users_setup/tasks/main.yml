@@ -1,0 +1,19 @@
+---
+# Prepare web user and web root
+# Create web user with sudo privileges
+- name: Create a web user with sudo privileges
+  user:
+    name: "{{username}}"
+    password: "{{password}}"
+    update_password: on_create
+    state: present
+    groups: sudo
+    append: true
+    create_home: true
+    skeleton: /etc/skel
+    shell: /bin/bash
+
+- name: Change root user password
+  user:
+    name: root
+    password: "{{root_password}}"
